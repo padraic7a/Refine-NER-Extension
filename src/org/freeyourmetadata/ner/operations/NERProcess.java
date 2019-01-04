@@ -8,9 +8,9 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.freeyourmetadata.ner.services.ExtractionResult;
 import org.freeyourmetadata.ner.services.NERService;
-import org.json.JSONObject;
 
 import com.google.refine.browsing.Engine;
+import com.google.refine.browsing.EngineConfig;
 import com.google.refine.browsing.RowVisitor;
 import com.google.refine.history.HistoryEntry;
 import com.google.refine.model.AbstractOperation;
@@ -33,7 +33,7 @@ public class NERProcess extends LongRunningProcess implements Runnable {
     private final Map<String, NERService> services;
     private final Map<String, Map<String,String>> settings;
     private final AbstractOperation parentOperation;
-    private final JSONObject engineConfig;
+    private final EngineConfig engineConfig;
     private final long historyEntryId;
 
     /**
@@ -49,7 +49,7 @@ public class NERProcess extends LongRunningProcess implements Runnable {
     protected NERProcess(final Project project, final Column column,
     		             final Map<String, NERService> services, final Map<String, Map<String, String>> settings,
                          final AbstractOperation parentOperation, final String description,
-                         final JSONObject engineConfig) {
+                         final EngineConfig engineConfig) {
         super(description);
         this.project = project;
         this.column = column;
@@ -155,7 +155,7 @@ public class NERProcess extends LongRunningProcess implements Runnable {
     protected Set<Integer> getFilteredRowIndices() {
         // Load the faceted browsing engine and configuration (including row filters)
         final Engine engine = new Engine(project);
-        try { engine.initializeFromJSON(engineConfig); }
+        try { engine.initializeFromConfig(engineConfig); }
         catch (Exception e) {}
         
         // Collect indices of rows that belong to the filter

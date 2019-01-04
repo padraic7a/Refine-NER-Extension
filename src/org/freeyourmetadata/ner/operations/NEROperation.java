@@ -19,6 +19,7 @@ import com.google.refine.operations.EngineDependentOperation;
 import com.google.refine.operations.OperationRegistry;
 import com.google.refine.process.Process;
 import com.google.refine.util.JSONUtilities;
+import com.google.refine.browsing.EngineConfig;
 
 /**
  * Operation that starts a named-entity recognition process
@@ -37,7 +38,7 @@ public class NEROperation extends EngineDependentOperation {
      * @param engineConfig The faceted browsing engine configuration
      */
     public NEROperation(final Column column, final SortedMap<String, NERService> services,
-                        final Map<String, Map<String, String>> settings, final JSONObject engineConfig) {
+                        final Map<String, Map<String, String>> settings, final EngineConfig engineConfig) {
         super(engineConfig);
         this.column = column;
         this.services = services;
@@ -66,10 +67,10 @@ public class NEROperation extends EngineDependentOperation {
             
             // Apply the service settings
             final Map<String, String> serviceSettings = new TreeMap<String, String>();
-            final JSONObject serviceSetttingsJson = parameters.getJSONObject(serviceName);
+            final JSONObject serviceSettingsJson = parameters.getJSONObject(serviceName);
             for (final String settingName : service.getExtractionSettings()) {
                 try {
-                    serviceSettings.put(settingName, serviceSetttingsJson.getString(settingName));
+                    serviceSettings.put(settingName, serviceSettingsJson.getString(settingName));
                 }
                 catch (JSONException e) { }
             }
@@ -77,7 +78,7 @@ public class NEROperation extends EngineDependentOperation {
         }
 
         return new NEROperation(project.columnModel.getColumnByName(operation.getString("column")),
-                                services, settings, engineConfig);
+                                services, settings, EngineConfig.reconstruct(engineConfig));
     }
 
     /** {@inheritDoc} */
@@ -86,7 +87,6 @@ public class NEROperation extends EngineDependentOperation {
         writer.object();
         writer.key("op"); writer.value(OperationRegistry.s_opClassToName.get(getClass()));
         writer.key("description"); writer.value(getBriefDescription(null));
-        writer.key("engineConfig"); writer.value(getEngineConfig());
         writer.key("column"); writer.value(column.getName());
         writer.key("services");
         JSONUtilities.writeStringArray(writer, services.keySet().toArray(new String[services.size()]));
@@ -103,6 +103,8 @@ public class NEROperation extends EngineDependentOperation {
             writer.endObject();
         }
         writer.endObject();
+        writer.key("engineConfig");
+        getEngineConfig().write(writer, options);
 
         writer.endObject();
     }

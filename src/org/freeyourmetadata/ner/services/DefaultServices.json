@@ -3,5 +3,6 @@
     {"name": "dataTXT",           "class": "org.freeyourmetadata.ner.services.DataTXT"},
     {"name": "DBpedia Spotlight", "class": "org.freeyourmetadata.ner.services.DBpediaSpotlight"},
     {"name": "WikiMeta",          "class": "org.freeyourmetadata.ner.services.WikiMeta"},
-    {"name": "Zemanta",           "class": "org.freeyourmetadata.ner.services.Zemanta"}
+    {"name": "Zemanta",           "class": "org.freeyourmetadata.ner.services.Zemanta"},
+    {"name": "Stanford NLP",      "class": "org.freeyourmetadata.ner.services.StanfordNLP"}
 ]

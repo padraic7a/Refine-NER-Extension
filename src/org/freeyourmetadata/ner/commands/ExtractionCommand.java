@@ -1,20 +1,18 @@
 package org.freeyourmetadata.ner.commands;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.freeyourmetadata.ner.operations.NEROperation;
-import org.freeyourmetadata.ner.services.NERService;
-import org.freeyourmetadata.ner.services.NERServiceManager;
-import org.json.JSONObject;
-
+import com.google.refine.browsing.EngineConfig;
 import com.google.refine.commands.EngineDependentCommand;
 import com.google.refine.model.AbstractOperation;
 import com.google.refine.model.Column;
 import com.google.refine.model.Project;
+import org.freeyourmetadata.ner.operations.NEROperation;
+import org.freeyourmetadata.ner.services.NERService;
+import org.freeyourmetadata.ner.services.NERServiceManager;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Command that starts a named-entity recognition operation
@@ -33,7 +31,7 @@ public class ExtractionCommand extends EngineDependentCommand {
 
     /** {@inheritDoc} */
     @Override
-    protected AbstractOperation createOperation(Project project, HttpServletRequest request, JSONObject engineConfig) throws Exception {
+    protected AbstractOperation createOperation(Project project, HttpServletRequest request, EngineConfig engineConfig) throws Exception {
         final String columnName = request.getParameter("column");
         final Column column = project.columnModel.getColumnByName(columnName);
         final String[] serviceNames = request.getParameterValues("services[]");
