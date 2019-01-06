@@ -1,4 +1,3 @@
-[**Download the Named-Entity Recognition extension for Google Refine / OpenRefine**](http://software.freeyourmetadata.org/ner-extension/ner-extension.zip)
 
 # OpenRefine Named-Entity Recognition
 This extension adds support for [named-entity recognition](http://en.wikipedia.org/wiki/Named-entity_recognition) services to [Google Refine](http://code.google.com/p/google-refine/) / [OpenRefine](https://github.com/OpenRefine/OpenRefine).
@@ -6,7 +5,7 @@ This extension adds support for [named-entity recognition](http://en.wikipedia.o
 ![[Screenshot of the extension]](http://freeyourmetadata.org/images/ner-extension.png)
 
 ## Installation
-0. Compile the source code to the `module` directory, or [download a compiled version](http://software.freeyourmetadata.org/ner-extension/) and unzip it.
+0. Compile the source code to the `module` directory.
 0. Copy the `module` folder to your extensions folder.
   - To find your extensions folder, choose *Browse workspace directory* from the Refine interface, and navigate to the folder `extensions` (which you should create if it doesn't exist yet).
 0. Start or restart Refine.
