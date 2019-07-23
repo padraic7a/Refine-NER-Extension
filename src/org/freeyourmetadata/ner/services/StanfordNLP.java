@@ -25,7 +25,7 @@ import static org.freeyourmetadata.util.UriUtil.createUri;
 public class StanfordNLP extends NERServiceBase implements NERService {
     private final static URI SERVICEBASEURL = createUri("http://localhost:9000");
     private final static URI DOCUMENTATIONURI = createUri("https://stanfordnlp.github.io/CoreNLP/ner.html");
-    private final static String[] SERVICESETTINGS = {};
+    private final static String[] SERVICESETTINGS = { "NLP Service URL"};
     private final static String[] EXTRACTIONSETTINGS = { "applyNumericClassifiers", "applyFineGrained" };
 
     /**
@@ -35,6 +35,11 @@ public class StanfordNLP extends NERServiceBase implements NERService {
         super(SERVICEBASEURL, null, SERVICESETTINGS, EXTRACTIONSETTINGS);
         setExtractionSettingDefault("applyNumericClassifiers", "false");
         setExtractionSettingDefault("applyFineGrained", "true");
+    }
+
+    /** {@inheritDoc} */
+    public boolean isConfigured() {
+        return getServiceSetting("NLP Service URL").length() > 0;
     }
 
     /**
@@ -82,7 +87,7 @@ public class StanfordNLP extends NERServiceBase implements NERService {
      */
     protected URI createExtractionRequestUrl(final String text, final Map<String, String> extractionSettings) {
         try {
-            URIBuilder builder = new URIBuilder(SERVICEBASEURL);
+            URIBuilder builder = new URIBuilder(getServiceSetting("NLP Service URL"));
             builder.addParameter("properties", "{\"annotators\":\"ner\","
                     + "\"ner.applyNumericClassifiers\":\""
                     + extractionSettings.get("applyNumericClassifiers") + "\","
@@ -91,7 +96,7 @@ public class StanfordNLP extends NERServiceBase implements NERService {
 
             return builder.build();
         } catch (java.net.URISyntaxException e) {
-            return SERVICEBASEURL;
+            return createUri(getServiceSetting("NLP Service URL"));
         }
     }
 
