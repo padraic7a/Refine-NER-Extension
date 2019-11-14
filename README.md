@@ -17,6 +17,15 @@ This extension adds support for [named-entity recognition](http://en.wikipedia.o
 0. Select the services you want to use.
 0. Click *Start extraction*.
 
+### Services
+
+#### StanfordNLP
+In order to use StanfordNLP an instance of the service must be running.
+
+0. Download the [NLP service software](https://stanfordnlp.github.io/CoreNLP/download.html) 
+0. Extract the download, and from within the extracted directory run
+   ```java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 15000```
+
 ## Free Your Metadata
 The Named-Entity Recognition extension has been developed as part of the [Free Your Metadata](http://freeyourmetadata.org) initiative.
 
