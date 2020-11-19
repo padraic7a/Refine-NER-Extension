@@ -37,3 +37,13 @@ If this extension is used for research, we kindly ask that you refer to the asso
 van Hooland, S., De Wilde, M., Verborgh, R., Steiner, T., and Van de Walle, R.
 [Exploring Entity Recognition and Disambiguation for Cultural Heritage Collections](http://freeyourmetadata.org/publications/named-entity-recognition-abstract.pdf).
 Digital Scholarship in the Humanities, Vol. 30 Iss. 2, pp. 262–279, 2015.
+
+## Compile
+
+* Execute `mvn package assembly:single`
+* Extension will be located into `target/ner-1.6.zip`
+
+## Usage
+
+* Extract the `ner-1.6.zip` into the OpenRefine folder `webapp/extensions`
+* Run OpenRefine and you can start a new project form the `Local Data` tab

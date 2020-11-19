@@ -9,7 +9,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.commons.lang.ArrayUtils;
+import jdk.nashorn.internal.ir.debug.JSONWriter;
+import org.apache.commons.lang3.ArrayUtils;
 import org.freeyourmetadata.ner.services.ExtractionResult;
 import org.freeyourmetadata.ner.services.NamedEntity;
 import org.json.JSONArray;

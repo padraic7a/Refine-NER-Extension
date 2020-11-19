@@ -1,13 +1,15 @@
 package org.freeyourmetadata.ner.commands;
 
 import java.io.IOException;
+import java.io.Writer;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.json.JSONTokener;
-import org.json.JSONWriter;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.google.refine.util.ParsingUtilities;
+
 
 import com.google.refine.commands.Command;
 
@@ -34,7 +36,8 @@ public abstract class NERCommand extends Command {
     @Override
     public void doPut(final HttpServletRequest request, final HttpServletResponse response)
             throws ServletException, IOException {
-        final JSONWriter writer = createResponseWriter(response);
+        final JsonGenerator writer = createResponseWriter(response);
+//        TODO: Continue here
         final JSONTokener tokener = new JSONTokener(request.getReader());
         try {
             put(request, tokener.nextValue(), writer);
@@ -51,9 +54,11 @@ public abstract class NERCommand extends Command {
      * @return The response writer
      * @throws IOException
      */
-    protected JSONWriter createResponseWriter(final HttpServletResponse response) throws IOException {
+    protected JsonGenerator createResponseWriter(final HttpServletResponse response) throws IOException {
+        response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Type", "application/json");
-        return new JSONWriter(response.getWriter());
+        Writer w = response.getWriter();
+        return ParsingUtilities.mapper.getFactory().createGenerator(w);
     }
     
     /**
@@ -62,7 +67,7 @@ public abstract class NERCommand extends Command {
      * @param response The response writer
      * @throws Exception if something goes wrong
      */
-    public void get(final HttpServletRequest request, final JSONWriter response) throws Exception {}
+    public void get(final HttpServletRequest request, final HttpServletResponse response) throws Exception {}
     
     /**
      * Handles a <tt>PUT</tt> request
@@ -71,5 +76,5 @@ public abstract class NERCommand extends Command {
      * @param response The response writer
      * @throws Exception if something goes wrong
      */
-    public void put(final HttpServletRequest request, final Object body, final JSONWriter response) throws Exception {}
+    public void put(final HttpServletRequest request, final Object body, final HttpServletResponse response) throws Exception {}
 }
