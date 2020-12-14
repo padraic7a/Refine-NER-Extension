@@ -2,26 +2,27 @@ package org.freeyourmetadata.ner.services;
 
 import static org.freeyourmetadata.util.UriUtil.createUri;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.http.HttpEntity;
 import org.freeyourmetadata.util.ParameterList;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * dataTXT service connector
+ *
  * @author Stefano Parmesan
  * @author Giuliano Tortoreto
  */
 public class DataTXT extends NERServiceBase {
     private final static URI SERVICEBASEURL = createUri("https://api.dandelion.eu/datatxt/nex/v1");
     private final static URI DOCUMENTATIONURI = createUri("https://dandelion.eu/docs/api/datatxt/nex/v1/");
-    private final static String[] SERVICESETTINGS = { "App ID", "App key"};
+    private final static String[] SERVICESETTINGS = {"App ID", "App key"};
     private final static String[] EXTRACTIONSETTINGS = {"Language", "Confidence", "Parse hashtag", "Min length"};
 
     /**
@@ -35,15 +36,19 @@ public class DataTXT extends NERServiceBase {
         setExtractionSettingDefault("Min length", "2");
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public boolean isConfigured() {
         return getServiceSetting("App ID").length() > 0
                 && getServiceSetting("App key").length() > 0;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     protected HttpEntity createExtractionRequestBody(final String text, final Map<String, String> extractionSettings)
-    throws UnsupportedEncodingException {
+            throws UnsupportedEncodingException {
         final ParameterList parameters = new ParameterList();
         parameters.add("lang", extractionSettings.get("Language"));
         parameters.add("text", text);
@@ -55,32 +60,36 @@ public class DataTXT extends NERServiceBase {
         return parameters.toEntity();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected NamedEntity[] parseExtractionResponse(final JSONObject response) throws JSONException {
+    protected NamedEntity[] parseExtractionResponse(final ObjectNode response) throws Exception {
         // Check response status
-        if (!response.isNull("error"))
+        if (!response.hasNonNull("error"))
             throw new IllegalArgumentException("dataTXT request failed.");
-        
-        // Find all annotations
-        final JSONArray annotations = response.getJSONArray("annotations");
-        final NamedEntity[] results = new NamedEntity[annotations.length()];
-        for (int i = 0; i < results.length; i++) {
-            final JSONObject annotation = annotations.getJSONObject(i);
-            final String label = annotation.getString("title");
-            final double score = annotation.getDouble("confidence");
-            final ArrayList<Disambiguation> disambiguations = new ArrayList<Disambiguation>();
 
-            disambiguations.add(new Disambiguation(label, createUri(annotation.getString("uri")), score));
-            results[i] = new NamedEntity(annotation.getString("spot"), disambiguations);
+        // Find all annotations
+        final ArrayNode annotations = (ArrayNode) response.get("annotations");
+        final NamedEntity[] results = new NamedEntity[annotations.size()];
+        for (int i = 0; i < results.length; i++) {
+            final ObjectNode annotation = (ObjectNode) annotations.get(i);
+            final String label = annotation.get("title").asText();
+            final double score = annotation.get("confidence").asDouble();
+            final ArrayList<Disambiguation> disambiguations = new ArrayList<>();
+
+            disambiguations.add(new Disambiguation(label, createUri(annotation.get("uri").asText()), score));
+            results[i] = new NamedEntity(annotation.get("spot").asText(), disambiguations);
         }
-        
+
         return results;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected Exception parseErrorResponse(final JSONObject response) throws JSONException {
-    	return response.has("message") ? new Exception(response.getString("message")) : null;
+    protected Exception parseErrorResponse(final ObjectNode response) throws IOException {
+        return response.has("message") ? new Exception(response.get("message").asText()) : null;
     }
 }

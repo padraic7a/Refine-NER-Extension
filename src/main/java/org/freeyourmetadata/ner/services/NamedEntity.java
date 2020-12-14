@@ -1,13 +1,13 @@
 package org.freeyourmetadata.ner.services;
 
+import java.io.IOException;
 import java.lang.String;
 import java.net.URI;
 import java.util.Collection;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONWriter;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import com.google.refine.model.Cell;
 import com.google.refine.model.Recon;
@@ -16,6 +16,7 @@ import com.google.refine.model.Recon.Judgment;
 
 /**
  * A named entity with a label and disambiguations
+ *
  * @author Ruben Verborgh
  * @author Stefano Parmesan
  */
@@ -27,35 +28,39 @@ public class NamedEntity {
 
     /**
      * Creates a new named entity without URIs
+     *
      * @param extractedText The label of the entity
      */
     public NamedEntity(final String extractedText) {
-        this(extractedText, new Disambiguation[] { new Disambiguation(extractedText) });
+        this(extractedText, new Disambiguation[]{new Disambiguation(extractedText)});
     }
 
     /**
      * Creates a new named entity with a single URI
+     *
      * @param extractedText The label of the entity
-     * @param uri The URI of the entity
+     * @param uri           The URI of the entity
      */
     public NamedEntity(final String extractedText, final URI uri) {
-        this(extractedText, new Disambiguation[] { new Disambiguation(extractedText, uri) });
+        this(extractedText, new Disambiguation[]{new Disambiguation(extractedText, uri)});
     }
-    
+
     /**
      * Creates a new named entity with a single URI
+     *
      * @param extractedText The label of the entity
-     * @param uri The URI of the entity
-     * @param score The confidence score of the entity
+     * @param uri           The URI of the entity
+     * @param score         The confidence score of the entity
      */
     public NamedEntity(final String extractedText, final URI uri, double score) {
-        this(extractedText, new Disambiguation[] { new Disambiguation(extractedText, uri, score) });
+        this(extractedText, new Disambiguation[]{new Disambiguation(extractedText, uri, score)});
     }
 
     /**
      * Creates a new named entity
+     *
      * @param extractedText The label of the entity
-     * @param uris The URIs of the entity
+     * @param uris          The URIs of the entity
      */
     public NamedEntity(final String extractedText, final URI[] uris) {
         this.extractedText = extractedText;
@@ -66,17 +71,19 @@ public class NamedEntity {
 
     /**
      * Creates a new named entity
-     * @param extractedText The label matched in the original text
+     *
+     * @param extractedText   The label matched in the original text
      * @param disambiguations An array of disambiguations
      */
     public NamedEntity(final String extractedText, final Disambiguation[] disambiguations) {
         this.extractedText = extractedText;
         this.disambiguations = disambiguations;
     }
-    
+
     /**
      * Creates a new named entity
-     * @param extractedText The label matched in the original text
+     *
+     * @param extractedText   The label matched in the original text
      * @param disambiguations A list of disambiguations
      */
     public NamedEntity(final String extractedText, final Collection<Disambiguation> disambiguations) {
@@ -86,21 +93,23 @@ public class NamedEntity {
 
     /**
      * Creates a new named entity from a JSON representation
+     *
      * @param json The JSON representation of the named entity
-     * @throws JSONException if the JSON is not correctly structured
+     * @throws IOException if the JSON is not correctly structured
      */
-    public NamedEntity(final JSONObject json) throws JSONException {
-        extractedText = json.getString("extractedText");
-        
-        final JSONArray jsonDisambiguations = json.getJSONArray("disambiguations");
-        disambiguations = new Disambiguation[jsonDisambiguations.length()];
+    public NamedEntity(final ObjectNode json) throws IOException {
+        extractedText = json.get("extractedText").asText();
+
+        final ArrayNode jsonDisambiguations = (ArrayNode) json.get("disambiguations");
+        disambiguations = new Disambiguation[jsonDisambiguations.size()];
         for (int i = 0; i < disambiguations.length; i++) {
-            disambiguations[i] = new Disambiguation(jsonDisambiguations.getJSONObject(i));
+            disambiguations[i] = new Disambiguation((ObjectNode) jsonDisambiguations.get(i));
         }
     }
 
     /**
      * Gets the entity's extractedText
+     *
      * @return The extracted text
      */
     public String getExtractedText() {
@@ -109,6 +118,7 @@ public class NamedEntity {
 
     /**
      * Gets the entity's disambiguations
+     *
      * @return The disambiguations
      */
     public Disambiguation[] getDisambiguations() {
@@ -117,22 +127,23 @@ public class NamedEntity {
 
     /**
      * Writes the named entity in a JSON representation
+     *
      * @param json The JSON writer
-     * @throws JSONException if an error occurs during writing
+     * @throws IOException if an error occurs during writing
      */
-    public void writeTo(final JSONWriter json) throws JSONException {
-        json.object();
-        json.key("extractedText"); json.value(getExtractedText());
-        json.key("disambiguations");
-        json.array();
+    public void writeTo(final JsonGenerator json) throws IOException {
+        json.writeStartObject();
+        json.writeStringField("extractedText", getExtractedText());
+        json.writeArrayFieldStart("disambiguations");
         for (final Disambiguation disambiguation : getDisambiguations())
             disambiguation.writeTo(json);
-        json.endArray();
-        json.endObject();
+        json.writeEndArray();
+        json.writeEndObject();
     }
 
     /**
      * Convert the named entity into a Refine worksheet cell
+     *
      * @return The cell
      */
     public Cell toCell() {

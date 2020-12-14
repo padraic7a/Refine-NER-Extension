@@ -16,20 +16,24 @@ import java.util.TreeMap;
 
 /**
  * Command that starts a named-entity recognition operation
+ *
  * @author Ruben Verborgh
  */
 public class ExtractionCommand extends EngineDependentCommand {
     private final NERServiceManager serviceManager;
-    
+
     /**
      * Creates a new <tt>ExtractionCommand</tt>
+     *
      * @param serviceManager The manager whose services will be used for named-entity recognition
      */
     public ExtractionCommand(final NERServiceManager serviceManager) {
         this.serviceManager = serviceManager;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected AbstractOperation createOperation(Project project, HttpServletRequest request, EngineConfig engineConfig) throws Exception {
         final String columnName = request.getParameter("column");
@@ -37,7 +41,7 @@ public class ExtractionCommand extends EngineDependentCommand {
         final String[] serviceNames = request.getParameterValues("services[]");
         final TreeMap<String, NERService> services = new TreeMap<String, NERService>();
         final Map<String, Map<String, String>> settings = new HashMap<String, Map<String, String>>();
-        
+
         // Instantiate all needed services
         for (final String serviceName : serviceNames) {
             // Create the service
@@ -48,11 +52,11 @@ public class ExtractionCommand extends EngineDependentCommand {
             final HashMap<String, String> serviceSettings = new HashMap<String, String>();
             settings.put(serviceName, serviceSettings);
             for (final String settingName : service.getExtractionSettings()) {
-            	final String settingValue = request.getParameter(serviceName + "-" + settingName);
-            	serviceSettings.put(settingName, settingValue == null ? "" : settingValue);
+                final String settingValue = request.getParameter(serviceName + "-" + settingName);
+                serviceSettings.put(settingName, settingValue == null ? "" : settingValue);
             }
         }
-        
+
         return new NEROperation(column, services, settings, getEngineConfig(request));
     }
 }

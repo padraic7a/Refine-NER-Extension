@@ -1,15 +1,17 @@
 package org.freeyourmetadata.ner.services;
 
+import java.io.IOException;
 import java.net.URI;
 
 import static org.freeyourmetadata.util.UriUtil.*;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONWriter;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 
 /**
  * A disambiguation of a named entity
+ *
  * @author Stefano Parmesan
  * @author Ruben Verborgh
  */
@@ -20,6 +22,7 @@ public class Disambiguation {
 
     /**
      * Creates a new disambiguation with an empty URI
+     *
      * @param label The label of the entity
      */
     public Disambiguation(final String label) {
@@ -28,8 +31,9 @@ public class Disambiguation {
 
     /**
      * Creates a new disambiguation
+     *
      * @param label The label of the entity
-     * @param uri The URI of the entity
+     * @param uri   The URI of the entity
      */
     public Disambiguation(final String label, final URI uri) {
         this(label, uri, 1.0);
@@ -37,8 +41,9 @@ public class Disambiguation {
 
     /**
      * Creates a new disambiguation
+     *
      * @param label The label of the entity
-     * @param uri The URI of the entity
+     * @param uri   The URI of the entity
      * @param score The disambiguation's score
      */
     public Disambiguation(final String label, final URI uri, final double score) {
@@ -49,17 +54,19 @@ public class Disambiguation {
 
     /**
      * Creates a new disambiguation from a JSON representation
+     *
      * @param json The JSON representation of the disambiguation
-     * @throws JSONException if the JSON is not correctly structured
+     * @throws IOException if the JSON is not correctly structured
      */
-    public Disambiguation(final JSONObject json) throws JSONException {
-        this.label = json.getString("label");
-        this.uri = createUri(json.getString("uri"));
-        this.score = json.getDouble("score");
+    public Disambiguation(final ObjectNode json) throws IOException {
+        this.label = json.get("label").asText();
+        this.uri = createUri(json.get("uri").asText());
+        this.score = json.get("score").asDouble();
     }
 
     /**
      * Gets the disambiguation's label
+     *
      * @return The label
      */
     public String getLabel() {
@@ -68,6 +75,7 @@ public class Disambiguation {
 
     /**
      * Gets the disambiguation's URI
+     *
      * @return The URI
      */
     public URI getUri() {
@@ -76,6 +84,7 @@ public class Disambiguation {
 
     /**
      * Gets the disambiguation's score
+     *
      * @return The score
      */
     public double getScore() {
@@ -84,14 +93,15 @@ public class Disambiguation {
 
     /**
      * Writes the disambiguation in a JSON representation
+     *
      * @param json The JSON writer
-     * @throws JSONException if an error occurs during writing
+     * @throws IOException if an error occurs during writing
      */
-    public void writeTo(final JSONWriter json) throws JSONException {
-        json.object();
-        json.key("label"); json.value(getLabel());
-        json.key("uri"); json.value(getUri().toString());
-        json.key("score"); json.value(getScore());
-        json.endObject();
+    public void writeTo(final JsonGenerator json) throws IOException {
+        json.writeStartObject();
+        json.writeStringField("label", getLabel());
+        json.writeStringField("uri", getUri().toString());
+        json.writeNumberField("score", getScore());
+        json.writeEndObject();
     }
 }

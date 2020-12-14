@@ -1,5 +1,8 @@
 package org.freeyourmetadata.ner.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -7,10 +10,8 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -20,13 +21,14 @@ import static org.freeyourmetadata.util.UriUtil.createUri;
 
 /**
  * DBpedia spotlight service connector
+ *
  * @author Ruben Verborgh
  */
 public class StanfordNLP extends NERServiceBase implements NERService {
     private final static URI SERVICEBASEURL = createUri("http://localhost:9000");
     private final static URI DOCUMENTATIONURI = createUri("https://stanfordnlp.github.io/CoreNLP/ner.html");
-    private final static String[] SERVICESETTINGS = { "NLP Service URL"};
-    private final static String[] EXTRACTIONSETTINGS = { "applyNumericClassifiers", "applyFineGrained" };
+    private final static String[] SERVICESETTINGS = {"NLP Service URL"};
+    private final static String[] EXTRACTIONSETTINGS = {"applyNumericClassifiers", "applyFineGrained"};
 
     /**
      * Creates a new Stanford NLP service connector
@@ -37,7 +39,9 @@ public class StanfordNLP extends NERServiceBase implements NERService {
         setExtractionSettingDefault("applyFineGrained", "true");
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public boolean isConfigured() {
         return getServiceSetting("NLP Service URL").length() > 0;
     }
@@ -66,6 +70,7 @@ public class StanfordNLP extends NERServiceBase implements NERService {
 
     /**
      * Parses the named-entity recognition response
+     *
      * @param response A response of the named-entity extraction service
      * @return The extracted named entities
      * @throws Exception if the response cannot be parsed
@@ -74,9 +79,14 @@ public class StanfordNLP extends NERServiceBase implements NERService {
         final String body = EntityUtils.toString(response.getEntity());
 
         // An invalid response is recognized by invalid JSON
-        final JSONObject bodyJson;
-        try { bodyJson = new JSONObject(body); }
-        catch (JSONException error) { throw new Exception(body); }
+        final ObjectNode bodyJson;
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            bodyJson = (ObjectNode) mapper.readTree(body);
+        } catch (IOException error) {
+            throw new Exception(body);
+        }
 
         return parseExtractionResponse(bodyJson);
     }
@@ -104,25 +114,25 @@ public class StanfordNLP extends NERServiceBase implements NERService {
      * {@inheritDoc}
      */
     @Override
-    protected NamedEntity[] parseExtractionResponse(final JSONObject response) throws JSONException {
+    protected NamedEntity[] parseExtractionResponse(final ObjectNode response) throws Exception {
         // Empty result if no resources were found
         if (!response.has("sentences"))
             return EMPTY_EXTRACTION_RESULT;
         // Extract resources
-        final JSONArray sentences = response.getJSONArray("sentences");
-        if (sentences.length() == 0)
+        final ArrayNode sentences = (ArrayNode) response.get("sentences");
+        if (sentences.size() == 0)
             return EMPTY_EXTRACTION_RESULT;
 
         ArrayList<NamedEntity> results = new ArrayList();
 
-        for (int i = 0; i < sentences.length(); i++) {
-            final JSONObject sentence = sentences.getJSONObject(i);
-            final JSONArray entityMentions = sentence.getJSONArray("entitymentions");
-            for(int j = 0; j < entityMentions.length(); j++) {
-                    final JSONObject entityMention = entityMentions.getJSONObject(j);
-                    results.add(new NamedEntity(entityMention.getString("text"),
-                            createUri("")));
-                }
+        for (int i = 0; i < sentences.size(); i++) {
+            final ObjectNode sentence = (ObjectNode) sentences.get(i);
+            final ArrayNode entityMentions = (ArrayNode) sentence.get("entitymentions");
+            for (int j = 0; j < entityMentions.size(); j++) {
+                final ObjectNode entityMention = (ObjectNode) entityMentions.get(j);
+                results.add(new NamedEntity(entityMention.get("text").asText(),
+                        createUri("")));
+            }
         }
 
         return results.toArray(new NamedEntity[results.size()]);

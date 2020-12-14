@@ -3,15 +3,19 @@ package org.freeyourmetadata.ner.services;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.refine.util.ParsingUtilities;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -19,21 +23,21 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONWriter;
 
 /**
  * Abstract base class for named-entity recognition services
  * with default support for JSON communication (but others are possible)
+ *
  * @author Ruben Verborgh
  */
 public abstract class NERServiceBase implements NERService {
-    /** The empty extraction result, containing no entities. */
+    /**
+     * The empty extraction result, containing no entities.
+     */
     protected final static NamedEntity[] EMPTY_EXTRACTION_RESULT = new NamedEntity[0];
-    
-    private final static Charset UTF8 = Charset.forName("UTF-8");
-    
+
+    private final static Charset UTF8 = StandardCharsets.UTF_8;
+
     private final URI serviceUrl;
     private final HashMap<String, String> serviceSettings;
     private final HashMap<String, String> extractionSettingsDefault;
@@ -41,88 +45,108 @@ public abstract class NERServiceBase implements NERService {
 
     /**
      * Creates a new named-entity recognition service base class
-     * @param serviceUrl The URL of the service (can be null if not fixed)
-     * @param serviceSettings The names of supported service settings
+     *
+     * @param serviceUrl         The URL of the service (can be null if not fixed)
+     * @param serviceSettings    The names of supported service settings
      * @param extractionSettings The names of supported extraction settings
-     * @param documentationUri The URI of the service's documentation
+     * @param documentationUri   The URI of the service's documentation
      */
     public NERServiceBase(final URI serviceUrl, final URI documentationUri,
-    					  final String[] serviceSettings, final String[] extractionSettings) {
+                          final String[] serviceSettings, final String[] extractionSettings) {
         this.serviceUrl = serviceUrl;
         this.documentationUri = documentationUri;
-        
+
         this.serviceSettings = new HashMap<String, String>(serviceSettings.length);
         for (String serviceSetting : serviceSettings)
             this.serviceSettings.put(serviceSetting, "");
 
         extractionSettingsDefault = new HashMap<String, String>(extractionSettings.length);
         for (String extractionSetting : extractionSettings)
-        	extractionSettingsDefault.put(extractionSetting, "");
+            extractionSettingsDefault.put(extractionSetting, "");
     }
-    
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Set<String> getServiceSettings() {
         return serviceSettings.keySet();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getServiceSetting(final String name) {
         return serviceSettings.get(name);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setServiceSetting(final String name, final String value) {
         if (!serviceSettings.containsKey(name))
-        	throw new IllegalArgumentException("The service setting " + name
-                                               + " is invalid for " + getClass().getName() + ".");
+            throw new IllegalArgumentException("The service setting " + name
+                    + " is invalid for " + getClass().getName() + ".");
         serviceSettings.put(name, value == null ? "" : value);
     }
-    
-    
-    /** {@inheritDoc} */
+
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Set<String> getExtractionSettings() {
         return extractionSettingsDefault.keySet();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getExtractionSettingDefault(final String name) {
         return extractionSettingsDefault.get(name);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setExtractionSettingDefault(final String name, final String value) {
         if (!extractionSettingsDefault.containsKey(name))
             throw new IllegalArgumentException("The extraction setting " + name
-                                               + " is invalid for " + getClass().getName() + ".");
+                    + " is invalid for " + getClass().getName() + ".");
         extractionSettingsDefault.put(name, value == null ? "" : value);
     }
-    
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public NamedEntity[] extractNamedEntities(final String text, final Map<String, String> settings) throws Exception {
         final HttpUriRequest request = createExtractionRequest(text, settings);
         return performExtractionRequest(request);
     }
-    
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     public boolean isConfigured() {
         return true;
     }
-    
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public URI getDocumentationUri() {
         return documentationUri;
     }
-    
+
     /**
      * Performs the named-entity recognition request
+     *
      * @param request The request
      * @return The extracted named entities
      * @throws Exception if the request fails
@@ -130,14 +154,18 @@ public abstract class NERServiceBase implements NERService {
     protected NamedEntity[] performExtractionRequest(final HttpUriRequest request) throws Exception {
         final DefaultHttpClient httpClient = new DefaultHttpClient();
         final HttpResponse response;
-        try { response = httpClient.execute(request); }
-        catch (IOException error) { throw new RuntimeException("Could not execute HTTP request", error); }
+        try {
+            response = httpClient.execute(request);
+        } catch (IOException error) {
+            throw new RuntimeException("Could not execute HTTP request", error);
+        }
         return parseExtractionResponse(response);
     }
 
     /**
      * Creates a named-entity recognition request on the specified text
-     * @param text The text to analyze
+     *
+     * @param text     The text to analyze
      * @param settings The settings for the extraction
      * @return The created request
      * @throws Exception if the request cannot be created
@@ -151,9 +179,10 @@ public abstract class NERServiceBase implements NERService {
         request.setEntity(body);
         return request;
     }
-    
+
     /**
      * Creates the URL for a named-entity recognition request on the specified text
+     *
      * @param text The text to analyze
      * @return The created URL
      */
@@ -163,40 +192,42 @@ public abstract class NERServiceBase implements NERService {
 
     /**
      * Creates the body for a named-entity recognition request on the specified text
-     * @param text The text to analyze
+     *
+     * @param text     The text to analyze
      * @param settings The settings for the extraction
      * @return The created body entity
      * @throws Exception if the request body cannot be created
      */
     protected HttpEntity createExtractionRequestBody(final String text, final Map<String, String> settings) throws Exception {
         final ByteArrayOutputStream bodyOutput = new ByteArrayOutputStream();
-        final JSONWriter bodyWriter = new JSONWriter(new OutputStreamWriter(bodyOutput, UTF8));
+        final JsonGenerator bodyWriter = ParsingUtilities.mapper.getFactory().createGenerator(bodyOutput);
         try {
             writeExtractionRequestBody(text, bodyWriter);
-        }
-        catch (JSONException error) {
+        } catch (IOException error) {
             throw new RuntimeException(error);
         }
         try {
             bodyOutput.close();
+        } catch (IOException e) {
         }
-        catch (IOException e) { }
         final byte[] bodyBytes = bodyOutput.toByteArray();
         final ByteArrayInputStream bodyInput = new ByteArrayInputStream(bodyBytes);
-        final HttpEntity body = new InputStreamEntity(bodyInput, bodyBytes.length);
-        return body;
+        return new InputStreamEntity(bodyInput, bodyBytes.length);
     }
-    
+
     /**
      * Writes the body JSON for a named-entity recognition request on the specified text
+     *
      * @param text The text to analyze
      * @param body The body writer
-     * @throws JSONException if writing the body goes wrong
+     * @throws IOException if writing the body goes wrong
      */
-    protected void writeExtractionRequestBody(final String text, final JSONWriter body) throws JSONException { }
-    
+    protected void writeExtractionRequestBody(final String text, final JsonGenerator body) throws IOException {
+    }
+
     /**
      * Parses the named-entity recognition response
+     *
      * @param response A response of the named-entity extraction service
      * @return The extracted named entities
      * @throws Exception if the extraction was not successful
@@ -204,35 +235,38 @@ public abstract class NERServiceBase implements NERService {
     protected NamedEntity[] parseExtractionResponse(final HttpResponse response) throws Exception {
         final Exception error = parseErrorResponse(response);
         if (error != null) throw error;
-        return parseExtractionResponse(new JSONObject((EntityUtils.toString(response.getEntity()))));
+        ObjectMapper mapper = new ObjectMapper();
+        return parseExtractionResponse((ObjectNode) mapper.readTree(EntityUtils.toString(response.getEntity())));
     }
-    
+
     /**
      * Parse the named-entity recognition response
+     *
      * @param response The response body
      * @return The extracted named entities
      * @throws Exception if the extraction was not successful
      */
-    protected NamedEntity[] parseExtractionResponse(final JSONObject response) throws Exception {
+    protected NamedEntity[] parseExtractionResponse(final ObjectNode response) throws Exception {
         return EMPTY_EXTRACTION_RESULT;
     }
-    
+
     /**
      * Encodes the specified text for use in an URL.
+     *
      * @param text The text to encode
      * @return The encoded text
      */
     protected static String urlEncode(String text) {
         try {
             return URLEncoder.encode(text, "UTF-8");
-        }
-        catch (UnsupportedEncodingException error) {
+        } catch (UnsupportedEncodingException error) {
             throw new RuntimeException(error);
         }
     }
-    
+
     /**
      * Parses a possible error in the HTTP response
+     *
      * @param response The response
      * @return The extracted error, or <tt>null</tt> if none exists
      */
@@ -240,27 +274,29 @@ public abstract class NERServiceBase implements NERService {
         if (response.getStatusLine().getStatusCode() < 300) return null;
         try {
             return parseErrorResponse((EntityUtils.toString(response.getEntity())));
-        }
-        catch (Exception error) {
-        	return new Exception(String.format("HTTP error %d", response.getStatusLine().getStatusCode()));
+        } catch (Exception error) {
+            return new Exception(String.format("HTTP error %d", response.getStatusLine().getStatusCode()));
         }
     }
-    
+
     /**
      * Parses a possible error in the HTTP response
+     *
      * @param response The response body
      * @return The extracted error, or <tt>null</tt> if none exists
      */
     protected Exception parseErrorResponse(final String response) throws Exception {
-        return parseErrorResponse(new JSONObject(response));
+        ObjectMapper mapper = new ObjectMapper();
+        return parseErrorResponse((ObjectNode) mapper.readTree(response));
     }
-    
+
     /**
      * Parses a possible error in the HTTP response
+     *
      * @param response The response body
      * @return The extracted error, or <tt>null</tt> if none exists
      */
-    protected Exception parseErrorResponse(final JSONObject response) throws JSONException {
-    	throw new UnsupportedOperationException();
+    protected Exception parseErrorResponse(final ObjectNode response) throws IOException {
+        throw new UnsupportedOperationException();
     }
 }

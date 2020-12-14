@@ -2,6 +2,7 @@ package org.freeyourmetadata.ner.services;
 
 import static org.freeyourmetadata.util.UriUtil.createUri;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -10,11 +11,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.http.HttpEntity;
 import org.freeyourmetadata.util.ParameterList;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Alchemy service connector
@@ -26,7 +26,7 @@ public class AlchemyAPI extends NERServiceBase {
     private final static String[] SERVICESETTINGS = { "API key" };
     private final static String[] EXTRACTIONSETTINGS = { };
     private final static HashSet<String> NONURIFIELDS = new HashSet<String>(
-            Arrays.asList(new String[]{ "subType", "name", "website" }));
+            Arrays.asList("subType", "name", "website"));
     
     /**
      * Creates a new Alchemy service connector
@@ -52,28 +52,28 @@ public class AlchemyAPI extends NERServiceBase {
     /** {@inheritDoc} */
     @Override
     @SuppressWarnings("unchecked")
-    protected NamedEntity[] parseExtractionResponse(final JSONObject response) throws JSONException {
+    protected NamedEntity[] parseExtractionResponse(final ObjectNode response) throws IOException {
         // Check response status
-        if (!"OK".equals(response.getString("status")))
-            throw new RuntimeException(response.optString("statusInfo", "Extraction failed"));
+        if (!"OK".equals(response.get("status").asText()))
+            throw new RuntimeException(response.get("statusInfo").asText("Extraction failed"));
         
         // Find all entities
-        final JSONArray entities = response.getJSONArray("entities");
-        final NamedEntity[] results = new NamedEntity[entities.length()];
+        final ArrayNode entities = (ArrayNode) response.get("entities");
+        final NamedEntity[] results = new NamedEntity[entities.size()];
         for (int i = 0; i < results.length; i++) {
-            final JSONObject entity = entities.getJSONObject(i);
-            final String entityText = entity.getString("text");
+            final ObjectNode entity = (ObjectNode) entities.get(i);
+            final String entityText = entity.get("text").asText();
             
             // Find all disambiguations
             final ArrayList<Disambiguation> disambiguations = new ArrayList<Disambiguation>();
             if (entity.has("disambiguated")) {
-                final JSONObject disambiguated = entity.getJSONObject("disambiguated");
-                final String label = disambiguated.getString("name");
-                final Iterator<String> keyIterator = disambiguated.keys();
+                final ObjectNode disambiguated = (ObjectNode) entity.get("disambiguated");
+                final String label = disambiguated.get("name").asText();
+                final Iterator<String> keyIterator = disambiguated.fieldNames();
                 while (keyIterator.hasNext()) {
                     final String key = keyIterator.next();
                     if (!NONURIFIELDS.contains(key))
-                        disambiguations.add(new Disambiguation(label, createUri(disambiguated.getString(key))));
+                        disambiguations.add(new Disambiguation(label, createUri(disambiguated.get(key).asText())));
                 }
             }
             // Create new named entity for the result

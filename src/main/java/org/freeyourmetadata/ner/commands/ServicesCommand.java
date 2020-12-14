@@ -1,38 +1,44 @@
 package org.freeyourmetadata.ner.commands;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.freeyourmetadata.ner.services.NERServiceManager;
-import org.json.JSONArray;
-import org.json.JSONWriter;
 
 /**
  * Servlet that provides read/write access to <tt>NERServiceManager</tt>
+ *
  * @author Ruben Verborgh
  */
 public class ServicesCommand extends NERCommand {
     private final NERServiceManager serviceManager;
-    
+
     /**
      * Creates a new <tt>ServicesCommand</tt>
+     *
      * @param serviceManager The data source
      */
     public ServicesCommand(final NERServiceManager serviceManager) {
         this.serviceManager = serviceManager;
     }
-    
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void get(final HttpServletRequest request, final JSONWriter response) throws Exception {
-        serviceManager.writeTo(response);
+    public void get(final HttpServletRequest request, final JsonGenerator writer) throws Exception {
+        serviceManager.writeTo(writer);
     }
-    
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void put(final HttpServletRequest request, final Object body, final JSONWriter response) throws Exception {
-        if(!(body instanceof JSONArray))
-            throw new IllegalArgumentException("Body should be a JSON array.");
-        serviceManager.updateFrom((JSONArray)body);
+    public void put(final HttpServletRequest request, final ArrayNode body, final JsonGenerator writer) throws Exception {
+        serviceManager.updateFrom(body);
         serviceManager.save();
     }
 }
