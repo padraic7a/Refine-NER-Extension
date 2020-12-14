@@ -5,12 +5,12 @@ This extension adds support for [named-entity recognition](http://en.wikipedia.o
 ![[Screenshot of the extension]](http://freeyourmetadata.org/images/ner-extension.png)
 
 ## Installation
-0. Compile the source code to the `module` directory.
-0. Copy the `module` folder to your extensions folder.
-  - To find your extensions folder, choose *Browse workspace directory* from the Refine interface, and navigate to the folder `extensions` (which you should create if it doesn't exist yet).
-0. Start or restart Refine.
-0. Open or create a project.
-0. Click the *Named-entity recognition* button at the top, choose *Configure services...* and enter your API keys.
+
+1. Download the zip file from the latest [release v1.6](https://github.com/ernestorefinepro/Refine-NER-Extension/releases/tag/v1.6)
+2. Extract the `ner-1.6.zip` into the OpenRefine folder `webapp/extensions`
+3. Start or restart OpenRefine
+4. Open or create a project
+5. Click the *Named-entity recognition* button at the top right, choose *Configure services...* and enter your API keys.
 
 ## Usage
 0. Click the small triangle before the column name and choose *Extract named entities...*
@@ -42,8 +42,3 @@ Digital Scholarship in the Humanities, Vol. 30 Iss. 2, pp. 262–279, 2015.
 
 * Execute `mvn package assembly:single`
 * Extension will be located into `target/ner-1.6.zip`
-
-## Usage
-
-* Extract the `ner-1.6.zip` into the OpenRefine folder `webapp/extensions`
-* Run OpenRefine and you can start a new project form the `Local Data` tab
