@@ -13,9 +13,9 @@ This extension adds support for [named-entity recognition](http://en.wikipedia.o
 5. Click the *Named-entity recognition* button at the top right, choose *Configure services...* and enter your API keys.
 
 ## Usage
-0. Click the small triangle before the column name and choose *Extract named entities...*
-0. Select the services you want to use.
-0. Click *Start extraction*.
+1. Click the small triangle before the column name and choose *Extract named entities...*
+2. Select the services you want to use.
+3. Click *Start extraction*.
 
 ### Services
 
