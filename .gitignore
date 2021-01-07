@@ -1,3 +1,8 @@
 *.class
 .settings
 module/MOD-INF/classes/
+
+ner.iml
+.idea
+
+target

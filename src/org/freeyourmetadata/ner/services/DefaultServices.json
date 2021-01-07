@@ -1,5 +1,0 @@
-[
-    {"name": "dataTXT",           "class": "org.freeyourmetadata.ner.services.DataTXT"},
-    {"name": "DBpedia Spotlight", "class": "org.freeyourmetadata.ner.services.DBpediaSpotlight"},
-    {"name": "Stanford NLP",      "class": "org.freeyourmetadata.ner.services.StanfordNLP"}
-]
