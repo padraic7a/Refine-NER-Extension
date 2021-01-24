@@ -18,10 +18,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.refine.util.ParsingUtilities;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 
 /**
@@ -152,7 +153,7 @@ public abstract class NERServiceBase implements NERService {
      * @throws Exception if the request fails
      */
     protected NamedEntity[] performExtractionRequest(final HttpUriRequest request) throws Exception {
-        final DefaultHttpClient httpClient = new DefaultHttpClient();
+        final HttpClient httpClient = HttpClientBuilder.create().build();
         final HttpResponse response;
         try {
             response = httpClient.execute(request);
