@@ -4,7 +4,7 @@
 
   <groupId>org.freeyourmetadata</groupId>
   <artifactId>ner</artifactId>
-  <version>1.6</version>
+  <version>1.6.1</version>
 
   <name>OpenRefine - NER extension</name>
   <description>Named-Entity Recognition extension for Google Refine / OpenRefine</description>
