@@ -28,7 +28,7 @@ public class StanfordNLP extends NERServiceBase implements NERService {
     private final static URI SERVICEBASEURL = createUri("http://localhost:9000");
     private final static URI DOCUMENTATIONURI = createUri("https://stanfordnlp.github.io/CoreNLP/ner.html");
     private final static String[] SERVICESETTINGS = {"NLP Service URL"};
-    private final static String[] EXTRACTIONSETTINGS = {"applyNumericClassifiers", "applyFineGrained"};
+    private final static String[] EXTRACTIONSETTINGS = {"applyNumericClassifiers", "applyFineGrained", "pipelineLanguage"};
 
     /**
      * Creates a new Stanford NLP service connector
@@ -37,6 +37,7 @@ public class StanfordNLP extends NERServiceBase implements NERService {
         super(SERVICEBASEURL, null, SERVICESETTINGS, EXTRACTIONSETTINGS);
         setExtractionSettingDefault("applyNumericClassifiers", "false");
         setExtractionSettingDefault("applyFineGrained", "true");
+        setExtractionSettingDefault("pipelineLanguage", "default");
     }
 
     /**
@@ -56,6 +57,7 @@ public class StanfordNLP extends NERServiceBase implements NERService {
         final HttpPost request = new HttpPost(requestUrl);
         request.setHeader("Accept", "application/json");
         request.setHeader("User-Agent", "Refine NER Extension");
+        request.setHeader("Content-Type", "UTF-8");
         request.setEntity(body);
         return request;
     }
@@ -65,7 +67,7 @@ public class StanfordNLP extends NERServiceBase implements NERService {
      */
     protected HttpEntity createExtractionRequestBody(final String text, final Map<String, String> extractionSettings)
             throws UnsupportedEncodingException {
-        return new StringEntity(text);
+        return new StringEntity(text, "UTF-8");
     }
 
     /**
@@ -101,7 +103,8 @@ public class StanfordNLP extends NERServiceBase implements NERService {
             builder.addParameter("properties", "{\"annotators\":\"ner\","
                     + "\"ner.applyNumericClassifiers\":\""
                     + extractionSettings.get("applyNumericClassifiers") + "\","
-                    + "\"ner.applyFineGrained\":\"" + extractionSettings.get("applyFineGrained") + "\"}"
+                    + "\"ner.applyFineGrained\":\"" + extractionSettings.get("applyFineGrained") + "\","
+                    + "\"pipelineLanguage\":\"" + extractionSettings.get("pipelineLanguage") + "\"}"
             );
 
             return builder.build();
