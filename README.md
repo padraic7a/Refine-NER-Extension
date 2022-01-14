@@ -6,11 +6,15 @@ This extension adds support for [named-entity recognition](http://en.wikipedia.o
 
 ## Installation
 
-1. Download the zip file from the latest [release](https://github.com/stkenny/Refine-NER-Extension/releases)
-2. Extract the `.zip` into the OpenRefine folder `webapp/extensions`
-3. Start or restart OpenRefine
+1. Download the zip file from the latest [release](https://github.com/stkenny/Refine-NER-Extension/releases/download/v1.6.2/ner-1.6.2.zip)
+1. If it does not exist, create a folder named **extensions/ner** under your user workspace directory for OpenRefine. The workspace should be located in the following places depending on your operating system (see [OpenRefine FAQ](https://github.com/OpenRefine/OpenRefine/wiki/FAQ-Where-Is-Data-Stored) for more details):
+    * Linux ~/.local/share/OpenRefine
+    * Windows C:/Documents and Settings/<user>/Application Data/OpenRefine OR C:/Documents and Settings/<user>/Local Settings/Application Data/OpenRefine
+    * Mac OSX ~/Library/Application Support/OpenRefine
+2. Unzip the downloaded release into the extensions/ner folder (step 1).
+3. Restart OpenRefine (OpenRefine usage instructions are provided in the [user documentation](https://github.com/OpenRefine/OpenRefine/wiki/Installation-Instructions#release-version))
 4. Open or create a project
-5. Click the *Named-entity recognition* button at the top right, choose *Configure services...* and enter your API keys.
+5. Click the *Named-entity recognition* button at the top right, choose *Configure services...*.
 
 ## Usage
 1. Click the small triangle before the column name and choose *Extract named entities...*
