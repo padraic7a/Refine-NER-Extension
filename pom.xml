@@ -25,6 +25,15 @@
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>3.3.0</version>
+        <executions>
+          <execution>
+            <id>assemble</id>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
         <configuration>
           <appendAssemblyId>false</appendAssemblyId>
           <descriptors>
