@@ -55,10 +55,20 @@ public class NIFServiceTest {
             "   nif:anchorOf \"USA\" ;\n" +
             "   nif:beginIndex \"64\"^^xsd:nonNegativeInteger ;\n" +
             "   nif:endIndex \"67\"^^xsd:nonNegativeInteger ;\n" +
-            "   nif:referenceContext <http://localhost/document/query> ;\n" +
+            "   nif:referenceContext <http://localhost/document/query> ;" +
+            "   itsrdf:taConfidence 23.2 ;\n" +
             "   itsrdf:taIdentRef <http://www.wikidata.org/entity/Q30> .\n" +
             "\n" +
-            "<http://www.wikidata.org/entity/Q771> rdfs:label \"Massachusetts\"@en.\n";
+            "<http://www.wikidata.org/entity/Q771> rdfs:label \"Massachusetts\"@en.\n" +
+            "\n" +
+            "<http://localhost/document/query#offset_0_67_41> a nif:OffsetBasedString,\n" +
+            "        nif:Phrase ;\n" +
+            "    nif:anchorOf \"USA\" ;\n" +
+            "    nif:beginIndex \"64\"^^xsd:nonNegativeInteger ;\n" +
+            "    nif:endIndex \"67\"^^xsd:nonNegativeInteger ;\n" +
+            "    nif:referenceContext <http://localhost/document/query> ;\n" +
+            "    itsrdf:taConfidence -1.5 ;\n" +
+            "    itsrdf:taIdentRef <http://www.wikidata.org/entity/Q43896634> .";
 
     NamedEntity[] namedEntities;
 
@@ -69,7 +79,9 @@ public class NIFServiceTest {
                         new Disambiguation("Massachusetts", new URI("http://www.wikidata.org/entity/Q771"))
                 }),
                 new NamedEntity("USA", new Disambiguation[]{
-                        new Disambiguation("Q30", new URI("http://www.wikidata.org/entity/Q30"))
+                        new Disambiguation("Q30", new URI("http://www.wikidata.org/entity/Q30"), 23.2),
+                        new Disambiguation("Q43896634", new URI("http://www.wikidata.org/entity/Q43896634"), -1.5)
+
                 })
         };
     }

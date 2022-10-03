@@ -70,16 +70,13 @@ public class NIFService implements NERService {
         String nifDocument = createNIFDocument(text);
 
         // Prepare the query
-        String endpointString = settings.get("endpoint");
-        URI endpoint = new URI(endpointString);
+        URI endpoint = new URI(settings.get("endpoint"));
         HttpPost request = new HttpPost(endpoint);
         request.setHeader("Accept", "application/turtle");
         request.setHeader("Content-Type", "application/turtle");
         request.setHeader("User-Agent", "Refine NER Extension");
         HttpEntity body = new StringEntity(nifDocument);
         request.setEntity(body);
-        System.out.println("curl -X POST -H \"Accept: application/turtle\" -H \"Content-Type: application/turtle\" -H \"User-Agent: Refine NER Extension\" "+settings.get("endpoint")+ " --data '"+nifDocument+"'");
-
         // Execute the request
         HttpResponse response = httpClient.execute(request);
 
@@ -197,7 +194,15 @@ public class NIFService implements NERService {
         NamedEntity[] entities = new NamedEntity[disambiguations.size()];
         int index = 0;
         for (Map.Entry<Phrase, List<Disambiguation>> entry : disambiguations.entrySet()) {
-            Disambiguation[] disambiguationArray = entry.getValue().toArray(new Disambiguation[entry.getValue().size()]);
+            List<Disambiguation> localDisambiguations = entry.getValue();
+            // sort disambiguations by decreasing score
+            localDisambiguations.sort(new Comparator<Disambiguation>() {
+                @Override
+                public int compare(Disambiguation a, Disambiguation b) {
+                    return Double.compare(b.getScore(), a.getScore());
+                }
+            });
+            Disambiguation[] disambiguationArray = localDisambiguations.toArray(new Disambiguation[localDisambiguations.size()]);
             entities[index] = new NamedEntity(entry.getKey().extractedText, disambiguationArray);
             index++;
         }
