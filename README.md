@@ -30,6 +30,11 @@ In order to use StanfordNLP an instance of the service must be running.
 0. Extract the download, and from within the extracted directory run
    ```java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 15000```
 
+#### NIF services
+
+This option lets you connect to any annotation service which supports the [NIF protocol](https://github.com/dice-group/gerbil/wiki/How-to-create-a-NIF-based-web-service). You can find a list of services in [the configuration file of the GERBIL platform](https://github.com/dice-group/gerbil/blob/master/src/main/properties/annotators.properties) (not
+all services listed there are NIF-compliant, you need to look for those with `NIFBasedAnnotatorWebservice` as a class).
+
 ## Free Your Metadata
 The Named-Entity Recognition extension has been developed as part of the [Free Your Metadata](http://freeyourmetadata.org) initiative.
 
