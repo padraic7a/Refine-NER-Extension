@@ -1,18 +1,18 @@
 package org.freeyourmetadata.ner.services;
 
-import java.io.IOException;
-import java.lang.String;
-import java.net.URI;
-import java.util.Collection;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import com.google.refine.model.Cell;
 import com.google.refine.model.Recon;
-import com.google.refine.model.ReconCandidate;
 import com.google.refine.model.Recon.Judgment;
+import com.google.refine.model.ReconCandidate;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Objects;
 
 /**
  * A named entity with a label and disambiguations
@@ -170,5 +170,29 @@ public class NamedEntity {
 
         // Return the cell, adding a reconciliation value if a match was found
         return new Cell(getExtractedText(), recon.match == null ? null : recon);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        NamedEntity that = (NamedEntity) o;
+        return Objects.equals(extractedText, that.extractedText) &&
+                Arrays.equals(disambiguations, that.disambiguations);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(extractedText);
+        result = 31 * result + Arrays.hashCode(disambiguations);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "NamedEntity{" +
+                "extractedText='" + extractedText + '\'' +
+                ", disambiguations=" + Arrays.toString(disambiguations) +
+                '}';
     }
 }

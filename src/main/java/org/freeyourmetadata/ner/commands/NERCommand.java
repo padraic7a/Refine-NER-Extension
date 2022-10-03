@@ -1,21 +1,16 @@
 package org.freeyourmetadata.ner.commands;
 
-import java.io.IOException;
-import java.io.Writer;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.google.refine.commands.Command;
+import com.google.refine.util.ParsingUtilities;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.refine.util.ParsingUtilities;
-
-
-import com.google.refine.commands.Command;
-import jdk.nashorn.internal.parser.JSONParser;
+import java.io.IOException;
+import java.io.Writer;
 
 /**
  * Base class for JSON-based commands

@@ -10,5 +10,9 @@
   {
     "name": "Stanford NLP",
     "class": "org.freeyourmetadata.ner.services.StanfordNLP"
+  },
+  {
+    "name": "NIF service",
+    "class": "org.freeyourmetadata.ner.services.NIFService"
   }
 ]

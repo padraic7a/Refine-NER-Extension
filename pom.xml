@@ -18,6 +18,7 @@
     <slf4j.version>1.7.5</slf4j.version>
     <jackson.version>2.11.2</jackson.version>
     <openrefine.version>3.3</openrefine.version>
+    <surefire.version>2.22.2</surefire.version>
   </properties>
 
   <build>
@@ -31,6 +32,11 @@
             <descriptor>src/assembly/module.xml</descriptor>
           </descriptors>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${surefire.version}</version>
       </plugin>
     </plugins>
   </build>
@@ -119,6 +125,16 @@
       <version>3.11</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>jena-core</artifactId>
+      <version>4.5.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>jena-arq</artifactId>
+      <version>4.5.0</version>
+    </dependency>
 
     <dependency>
       <groupId>org.testng</groupId>
@@ -126,6 +142,13 @@
       <version>6.9.10</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>mockwebserver</artifactId>
+      <version>4.9.0</version>
+      <scope>test</scope>
+    </dependency>
+
 
   </dependencies>
 

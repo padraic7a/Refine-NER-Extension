@@ -2,6 +2,7 @@ package org.freeyourmetadata.ner.services;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Objects;
 
 import static org.freeyourmetadata.util.UriUtil.*;
 
@@ -103,5 +104,29 @@ public class Disambiguation {
         json.writeStringField("uri", getUri().toString());
         json.writeNumberField("score", getScore());
         json.writeEndObject();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Disambiguation that = (Disambiguation) o;
+        return Double.compare(that.score, score) == 0 &&
+                Objects.equals(label, that.label) &&
+                Objects.equals(uri, that.uri);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(label, uri, score);
+    }
+
+    @Override
+    public String toString() {
+        return "Disambiguation{" +
+                "label='" + label + '\'' +
+                ", uri=" + uri +
+                ", score=" + score +
+                '}';
     }
 }
