@@ -71,6 +71,7 @@ public class NIFServiceTest {
             "    itsrdf:taIdentRef <http://www.wikidata.org/entity/Q43896634> .";
 
     NamedEntity[] namedEntities;
+    NamedEntity[] namedEntitiesNoMatch;
 
     @BeforeClass
     public void setUpEntities() throws URISyntaxException {
@@ -84,6 +85,17 @@ public class NIFServiceTest {
 
                 })
         };
+        
+        namedEntitiesNoMatch = new NamedEntity[]{
+                new NamedEntity("MA", new Disambiguation[]{
+                        new Disambiguation("Massachusetts", new URI("http://www.wikidata.org/entity/Q771"))
+                }, false),
+                new NamedEntity("USA", new Disambiguation[]{
+                        new Disambiguation("Q30", new URI("http://www.wikidata.org/entity/Q30"), 23.2),
+                        new Disambiguation("Q43896634", new URI("http://www.wikidata.org/entity/Q43896634"), -1.5)
+
+                }, false)
+        };
     }
 
     @Test
@@ -95,9 +107,16 @@ public class NIFServiceTest {
 
     @Test
     public void testParseNifResponse() throws URISyntaxException {
-        NamedEntity[] entities = NIFService.parseResponse(exampleText, nifResponse);
+        NamedEntity[] entities = NIFService.parseResponse(exampleText, nifResponse, 0);
 
         Assert.assertEquals(entities, namedEntities);
+    }
+    
+    @Test
+    public void testParseNifResponseNoMatch() throws URISyntaxException {
+        NamedEntity[] entities = NIFService.parseResponse(exampleText, nifResponse, 100);
+
+        Assert.assertEquals(entities, namedEntitiesNoMatch);
     }
 
     @Test

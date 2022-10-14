@@ -62,21 +62,25 @@ public class NIFService implements NERService {
     public static final Property ITSRDF_TA_IDENTREF = ResourceFactory.createProperty(ITSRDF_PREFIX, "taIdentRef");
     public static final Property ITSRDF_TA_CONFIDENCE = ResourceFactory.createProperty(ITSRDF_PREFIX, "taConfidence");
 
-
+    private static final String CONFIDENCE_THRESHOLD_NAME = "Confidence threshold";
+    private static final String ENDPOINT_NAME = "Endpoint";
+    
     private static final String documentURI = "http://localhost/document/query";
 
     protected final HttpClient httpClient = HttpClientBuilder.create().build();
 
     protected Map<String, String> settings;
+    protected double confidenceThreshold;
 
     public NIFService() {
         this.settings = new HashMap<>();
-        settings.put("endpoint", "");
+        settings.put(ENDPOINT_NAME, "");
+        confidenceThreshold = 0;
     }
 
     public NIFService(URI endpoint) {
         this();
-        settings.put("endpoint", endpoint.toString());
+        settings.put(ENDPOINT_NAME, endpoint.toString());
     }
 
     @Override
@@ -85,7 +89,7 @@ public class NIFService implements NERService {
         String nifDocument = createNIFDocument(text);
 
         // Prepare the query
-        URI endpoint = new URI(settings.get("endpoint"));
+        URI endpoint = new URI(settings.get(ENDPOINT_NAME));
         HttpPost request = new HttpPost(endpoint);
         request.setHeader("Accept", "application/turtle");
         request.setHeader("User-Agent", "Refine NER Extension");
@@ -100,7 +104,7 @@ public class NIFService implements NERService {
 
         // Read the response
         String responseString = EntityUtils.toString(response.getEntity());
-        return parseResponse(text, responseString);
+        return parseResponse(text, responseString, confidenceThreshold);
     }
 
     /**
@@ -139,7 +143,7 @@ public class NIFService implements NERService {
      * @param turtle the turtle response from the service
      * @return the list of named entities
      */
-    protected static NamedEntity[] parseResponse(String originalText, String turtle) {
+    protected static NamedEntity[] parseResponse(String originalText, String turtle, double confidenceThreshold) {
         InputStream inputStream = IOUtils.toInputStream(turtle, Charset.defaultCharset());
         Dataset dataset = RDFParser.create()
                 .source(inputStream)
@@ -215,8 +219,9 @@ public class NIFService implements NERService {
                     return Double.compare(b.getScore(), a.getScore());
                 }
             });
+            boolean matched = localDisambiguations.stream().mapToDouble(d -> d.getScore()).max().orElse(Double.MIN_VALUE) > confidenceThreshold;
             Disambiguation[] disambiguationArray = localDisambiguations.toArray(new Disambiguation[localDisambiguations.size()]);
-            entities[index] = new NamedEntity(entry.getKey().extractedText, disambiguationArray);
+            entities[index] = new NamedEntity(entry.getKey().extractedText, disambiguationArray, matched);
             index++;
         }
         return entities;
@@ -242,22 +247,31 @@ public class NIFService implements NERService {
 
     @Override
     public Set<String> getExtractionSettings() {
-        return Collections.emptySet();
+        return Collections.singleton(CONFIDENCE_THRESHOLD_NAME);
     }
 
     @Override
     public String getExtractionSettingDefault(String name) {
+        if (CONFIDENCE_THRESHOLD_NAME.equals(name)) {
+            return "0";
+        }
         return null;
     }
 
     @Override
     public void setExtractionSettingDefault(String name, String value) {
-
+        if (CONFIDENCE_THRESHOLD_NAME.equals(name)) {
+            try {
+                confidenceThreshold = Double.parseDouble(value);
+            } catch(NumberFormatException e) {
+                // ignore setting
+            }
+        }
     }
 
     @Override
     public boolean isConfigured() {
-        return !settings.get("endpoint").isEmpty();
+        return !settings.get(ENDPOINT_NAME).isEmpty();
     }
 
     @Override

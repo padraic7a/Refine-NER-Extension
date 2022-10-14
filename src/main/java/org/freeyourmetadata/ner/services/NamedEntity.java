@@ -19,12 +19,14 @@ import java.util.Objects;
  *
  * @author Ruben Verborgh
  * @author Stefano Parmesan
+ * @author Antonin Delpeuch
  */
 public class NamedEntity {
     private final static String[] EMPTY_TYPE_SET = new String[0];
 
     private final String extractedText;
     private final Disambiguation[] disambiguations;
+    private final boolean matched;
 
     /**
      * Creates a new named entity without URIs
@@ -64,20 +66,34 @@ public class NamedEntity {
      */
     public NamedEntity(final String extractedText, final URI[] uris) {
         this.extractedText = extractedText;
+        this.matched = true;
         this.disambiguations = new Disambiguation[uris.length];
         for (int i = 0; i < uris.length; i++)
             disambiguations[i] = new Disambiguation(extractedText, uris[i]);
     }
 
     /**
-     * Creates a new named entity
+     * Creates a new named entity. If there is any disambiguation,
+     * the corresponding cell will be marked as matched to the first one of them.
      *
      * @param extractedText   The label matched in the original text
      * @param disambiguations An array of disambiguations
      */
     public NamedEntity(final String extractedText, final Disambiguation[] disambiguations) {
+        this(extractedText, disambiguations, true);
+    }
+    
+    /**
+     * Creates a new named entity
+     *
+     * @param extractedText   The label matched in the original text
+     * @param disambiguations An array of disambiguations
+     * @param matched         Whether to mark the corresponding cell as matched (assuming there is at least a candidate)
+     */
+    public NamedEntity(final String extractedText, final Disambiguation[] disambiguations, boolean matched) {
         this.extractedText = extractedText;
         this.disambiguations = disambiguations;
+        this.matched = matched;
     }
 
     /**
@@ -89,6 +105,7 @@ public class NamedEntity {
     public NamedEntity(final String extractedText, final Collection<Disambiguation> disambiguations) {
         this.extractedText = extractedText;
         this.disambiguations = disambiguations.toArray(new Disambiguation[disambiguations.size()]);
+        this.matched = true;
     }
 
     /**
@@ -99,7 +116,7 @@ public class NamedEntity {
      */
     public NamedEntity(final ObjectNode json) throws IOException {
         extractedText = json.get("extractedText").asText();
-
+        matched = json.has("matched") ? json.get("matched").asBoolean(true) : true;
         final ArrayNode jsonDisambiguations = (ArrayNode) json.get("disambiguations");
         disambiguations = new Disambiguation[jsonDisambiguations.size()];
         for (int i = 0; i < disambiguations.length; i++) {
@@ -149,7 +166,7 @@ public class NamedEntity {
     public Cell toCell() {
         // Try to determine a reconciliation value for the cell
         final Recon recon = new Recon(-1L, "", "");
-        recon.judgment = Judgment.Matched;
+        recon.judgment = matched ? Judgment.Matched : Judgment.None;
         recon.judgmentAction = "auto";
         recon.service = "NamedEntity";
 
@@ -161,15 +178,15 @@ public class NamedEntity {
                 final ReconCandidate candidate = new ReconCandidate(uri, match.getLabel(), EMPTY_TYPE_SET, match.getScore());
                 recon.addCandidate(candidate);
                 // If this candidate is better than the previous best candidate, make it the match
-                if (recon.match == null || match.getScore() > recon.match.score) {
+                if (matched && (recon.match == null || match.getScore() > recon.match.score)) {
                     recon.match = candidate;
-                    recon.matchRank = i;
+                    recon.matchRank = recon.candidates.size() - 1;
                 }
             }
         }
 
         // Return the cell, adding a reconciliation value if a match was found
-        return new Cell(getExtractedText(), recon.match == null ? null : recon);
+        return new Cell(getExtractedText(), recon);
     }
 
     @Override
@@ -178,7 +195,8 @@ public class NamedEntity {
         if (o == null || getClass() != o.getClass()) return false;
         NamedEntity that = (NamedEntity) o;
         return Objects.equals(extractedText, that.extractedText) &&
-                Arrays.equals(disambiguations, that.disambiguations);
+                Arrays.equals(disambiguations, that.disambiguations) &&
+                matched == that.matched;
     }
 
     @Override
@@ -193,6 +211,7 @@ public class NamedEntity {
         return "NamedEntity{" +
                 "extractedText='" + extractedText + '\'' +
                 ", disambiguations=" + Arrays.toString(disambiguations) +
+                ", matched=" + Boolean.toString(matched) +
                 '}';
     }
 }
