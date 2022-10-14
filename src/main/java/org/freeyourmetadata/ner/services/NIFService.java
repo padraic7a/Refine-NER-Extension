@@ -1,16 +1,39 @@
 package org.freeyourmetadata.ner.services;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.query.Dataset;
-import org.apache.jena.rdf.model.*;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.ResIterator;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFLanguages;
@@ -20,14 +43,6 @@ import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
 import org.freeyourmetadata.util.UriUtil;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.util.*;
 
 public class NIFService implements NERService {
 
@@ -73,9 +88,8 @@ public class NIFService implements NERService {
         URI endpoint = new URI(settings.get("endpoint"));
         HttpPost request = new HttpPost(endpoint);
         request.setHeader("Accept", "application/turtle");
-        request.setHeader("Content-Type", "application/turtle");
         request.setHeader("User-Agent", "Refine NER Extension");
-        HttpEntity body = new StringEntity(nifDocument);
+        HttpEntity body = new StringEntity(nifDocument, ContentType.create("application/turtle", Charset.forName("utf-8")));
         request.setEntity(body);
         // Execute the request
         HttpResponse response = httpClient.execute(request);
@@ -137,7 +151,6 @@ public class NIFService implements NERService {
 
         // iterate over annotations
         ResIterator iter = model.listSubjectsWithProperty(ITSRDF_TA_IDENTREF);
-        List<NamedEntity> namedEntities = new ArrayList<>();
         Map<Phrase, List<Disambiguation>> disambiguations = new HashMap<>();
         while(iter.hasNext()) {
             Resource resource = iter.nextResource();
