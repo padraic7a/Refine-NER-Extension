@@ -1,3 +1,4 @@
+[![Java CI with Maven](https://github.com/stkenny/Refine-NER-Extension/actions/workflows/maven.yml/badge.svg)](https://github.com/stkenny/Refine-NER-Extension/actions/workflows/maven.yml)
 
 # OpenRefine Named-Entity Recognition
 This extension adds support for [named-entity recognition](http://en.wikipedia.org/wiki/Named-entity_recognition) services to [Google Refine](http://code.google.com/p/google-refine/) / [OpenRefine](https://github.com/OpenRefine/OpenRefine).
