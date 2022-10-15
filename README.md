@@ -44,5 +44,5 @@ Digital Scholarship in the Humanities, Vol. 30 Iss. 2, pp. 262–279, 2015.
 
 ## Compile
 
-* Execute `mvn package assembly:single`
+* Execute `mvn package`
 * Extension will be located into `target/`
