@@ -14,10 +14,6 @@ function init() {
   logger.info("Initializing commands, changes, and operations");
   refineServlet.registerCommand(module, "services", new commands.ServicesCommand(serviceManager));
   refineServlet.registerCommand(module, "extractions", new commands.ExtractionCommand(serviceManager));
-  refineServlet.registerClassMapping(
-    "com.google.refine.model.changes.DataExtensionChange",
-    "org.freeyourmetadata.ner.operations.NERChange"
-  );
   refineServlet.cacheClass(Packages.org.freeyourmetadata.ner.operations.NERChange);
   operationRegistry.registerOperation(module, "ner", Packages.org.freeyourmetadata.ner.operations.NEROperation);
 
