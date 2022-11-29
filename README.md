@@ -30,6 +30,7 @@ In order to use StanfordNLP an instance of the service must be running.
 0. Download the [NLP service software](https://stanfordnlp.github.io/CoreNLP/download.html) 
 0. Extract the download, and from within the extracted directory run
    ```java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 15000```
+0. To configure the service enter http://localhost:9000/ as the NLP Service URL.   
 
 #### NIF services
 
